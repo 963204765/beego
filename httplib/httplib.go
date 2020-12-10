@@ -387,6 +387,11 @@ func (b *BeegoHTTPRequest) buildURL(paramBody string) {
 			pr, pw := io.Pipe()
 			bodyWriter := multipart.NewWriter(pw)
 			go func() {
+				for k, v := range b.params {
+					for _, vv := range v {
+						bodyWriter.WriteField(k, vv)
+					}
+				}
 				for formname, filename := range b.files {
 					fileWriter, err := bodyWriter.CreateFormFile(formname, filename)
 					if err != nil {
@@ -401,11 +406,6 @@ func (b *BeegoHTTPRequest) buildURL(paramBody string) {
 					fh.Close()
 					if err != nil {
 						log.Println("Httplib:", err)
-					}
-				}
-				for k, v := range b.params {
-					for _, vv := range v {
-						bodyWriter.WriteField(k, vv)
 					}
 				}
 				bodyWriter.Close()
